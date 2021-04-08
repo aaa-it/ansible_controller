@@ -1,0 +1,43 @@
+--- 
+- hosts: all
+  become: true
+
+  tasks:
+  - name: Allow SSH login
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '^PasswordAuthentication '
+      line: PasswordAuthentication yes
+    notify:
+      - Restart service sshd
+
+  - name: Create user user01
+    user:
+      name: user01
+      password: $6$mysecretsalt$35COkuMlVB3m5zHx18JCoA8L69urmOVJnX0inPDhquMLHqO06xWNS1yI/dRFYMrgjqXd66Er2qM4VbwLj88FE/
+      update_password: on_create
+      generate_ssh_key: yes
+
+  - name: Enable RHSM repo extras
+    rhsm_repository:
+      name: rhel-7-server-extras-rpms
+
+  - name: Install OS packages
+    package:
+      name: 
+        - python3
+        - libselinux-python3
+        - docker
+        - git
+      state: present
+
+  - name: Start docker service
+    service:
+      name: docker
+      state: started
+
+  handlers:
+    - name: Restart SSH server
+      service:
+        name: sshd
+        state: restarted

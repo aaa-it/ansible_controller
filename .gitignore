@@ -1,0 +1,5 @@
+molecule/
+.yamllint
+.vscode
+.vagrant
+Vagrantfile
